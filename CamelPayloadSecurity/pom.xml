@@ -16,7 +16,7 @@
   	<camel.version>2.9.0</camel.version>
   	<cxf.version>2.5.2</cxf.version>
   	<spring.version>3.0.6.RELEASE</spring.version>
-  	<spring-ws.version>2.0.4.RELEASE</spring-ws.version>
+  	<spring-ws.version>2.0.3.RELEASE</spring-ws.version>
   </properties>
 
   <dependencies>
