@@ -56,27 +56,36 @@
 				</otherwise>
 			</choice>
 		</route>
+		
+		<route id="categoryEndpoint">
+			<from uri="cxf:bean:categoryEndpoint" />
+			<choice>
+				<when>
+					<simple>${in.header.operationName} == 'calculateCategory'</simple>
+					<to uri="direct:calculateCategory" />
+				</when>
+				<otherwise>
+					<log message="unknown operation name: '${in.header.operationName}'" />
+				</otherwise>
+			</choice>
+		</route>
 
 		<route id="findUserData">
 			<from uri="direct:findUserData" />
 
-			<log message="findUserData" />
-
 			<convertBodyTo type="java.lang.Integer" />
 
 			<bean ref="userDataBean" method="loadUserData" />
-			<bean ref="categoryBean" method="processData" />
+			<to uri="direct:calculateCategory" />
 		</route>
 
 		<route id="findUserDataXML">
 			<from uri="direct:findUserDataXML" />
 
-			<log message="findUserDataXML" />
-
 			<convertBodyTo type="java.lang.Integer" />
 
 			<bean ref="userDataBean" method="loadUserData" />
-			<bean ref="categoryBean" method="processData" />
+			<to uri="direct:calculateCategory" />
 		</route>
 
 		<route id="findUserDataSymEnc">
@@ -316,6 +325,14 @@
 			</unmarshal>
 
 			<log message="BODY AFTER ASYMMETRIC XML DECRYPTION: ${body}" />
+		</route>
+
+		<route id="calculateCategory">
+			<from uri="direct:calculateCategory" />
+			
+			<convertBodyTo type="com.trivadis.camel.security.user.UserData" />
+			
+			<bean ref="categoryBean" method="processData" />
 		</route>
 	</camelContext>
 

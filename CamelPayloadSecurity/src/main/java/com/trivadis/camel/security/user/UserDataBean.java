@@ -18,13 +18,14 @@ public class UserDataBean {
 	private SimpleJdbcTemplate simpleJdbcTemplate;
 
 	public UserData loadUserData(final int socialSecurityNumber) {
-		String sql = "select first_name, last_name, street, zip, city, country "
-				+ " from userdata where social_security_number = ?";
+		String sql = "select company, first_name, last_name, street, zip, city, country "
+				+ "from userdata where social_security_number = ?";
 
 		RowMapper<UserData> mapper = new RowMapper<UserData>() {
 			public UserData mapRow(ResultSet rs, int rowNum)
 					throws SQLException {
 				UserData userData = new UserData();
+				userData.setCompany(rs.getString("company"));
 				userData.setFirstName(rs.getString("first_name"));
 				userData.setLastName(rs.getString("last_name"));
 				userData.setStreet(rs.getString("street"));

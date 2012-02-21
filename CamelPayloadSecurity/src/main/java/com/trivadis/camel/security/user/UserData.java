@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class UserData implements Serializable {
 	private static final long serialVersionUID = -1752421601600456937L;
 	
+	private String company;
 	private String firstName;
 	private String lastName;
 	private String street;
@@ -23,6 +24,15 @@ public class UserData implements Serializable {
 	private String country;
 	private int socialSecurityNumber;
 	private int category;
+
+	@XmlElement
+	public String getCompany() {
+		return company;
+	}
+
+	public void setCompany(String company) {
+		this.company = company;
+	}
 
 	@XmlElement
 	public String getFirstName() {
@@ -99,6 +109,8 @@ public class UserData implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder data = new StringBuilder();
+		data.append(company);
+		data.append(", ");
 		data.append(firstName);
 		data.append(", ");
 		data.append(lastName);
