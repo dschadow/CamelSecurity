@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="userDataBean" class="com.trivadis.camel.security.user.UserDataBean">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="categoryBean" class="com.trivadis.camel.security.category.CategoryBean" />
+
+	<bean id="xmlUtil" class="com.trivadis.camel.security.util.XMLUtil" />
+
+	<bean id="desKey" class="com.trivadis.camel.security.crypto.KeyGeneration"
+		factory-method="getDesKey" />
+
+	<bean id="aesKey" class="com.trivadis.camel.security.crypto.KeyGeneration"
+		factory-method="getAesKey" />
+
+	<bean id="signatureStore" class="org.springframework.ws.soap.security.support.KeyStoreFactoryBean">
+		<property name="password" value="camelsec" />
+		<property name="location" value="classpath:signatureStore.jks" />
+	</bean>
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	    <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+	    <property name="url" value="jdbc:hsqldb:mem:."/>
+	    <property name="username" value="sa"/>
+	    <property name="password" value=""/>
+    </bean>
+</beans>

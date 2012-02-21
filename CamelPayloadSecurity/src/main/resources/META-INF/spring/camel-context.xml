@@ -1,23 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one or more
-    contributor license agreements.  See the NOTICE file distributed with
-    this work for additional information regarding copyright ownership.
-    The ASF licenses this file to You under the Apache License, Version 2.0
-    (the "License"); you may not use this file except in compliance with
-    the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
--->
-
-<!-- Configures the Camel Context-->
-
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:camel="http://camel.apache.org/schema/spring"
@@ -25,26 +6,317 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-  <camel:camelContext xmlns="http://camel.apache.org/schema/spring">
-    <camel:package>trivadis.com</camel:package>
-    <!-- here is a sample which processes the input files
-         (leaving them in place - see the 'noop' flag)
-         then performs content based routing on the message
-         using XPath -->
-    <camel:route>
-      <camel:from uri="file:src/data?noop=true"/>
-      <camel:choice>
-        <camel:when>
-          <camel:xpath>/person/city = 'London'</camel:xpath>
-          <camel:log message="UK message"/>
-          <camel:to uri="file:target/messages/uk"/>
-        </camel:when>
-        <camel:otherwise>
-          <camel:log message="Other message"/>
-          <camel:to uri="file:target/messages/others"/>
-        </camel:otherwise>
-      </camel:choice>
-    </camel:route>
-  </camel:camelContext>
+  	<import resource="classpath:spring/beans.xml" />
+	<import resource="classpath:spring/services.cxf.xml" />
+
+	<camel:keyStoreParameters id="keyStore" resource="./camel.jks" password="camelsec" />
+
+	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
+		<dataFormats>
+			<crypto id="des" algorithm="DES" keyRef="desKey" />
+			<crypto id="aes" algorithm="AES" keyRef="aesKey" />
+
+			<pgp id="asymmEncrypt" keyFileName="./pubring.gpg" keyUserid="camel@trivadis.com" />
+			<pgp id="asymmDecrypt" keyFileName="./secring.gpg" keyUserid="camel@trivadis.com" password="camelsec" />
+		</dataFormats>
+
+		<route id="userDataEndpoint">
+			<from uri="cxf:bean:userDataEndpoint" />
+			<choice>
+				<when>
+					<simple>${in.header.operationName} == 'findUserData'</simple>
+					<to uri="direct:findUserData" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataXML'</simple>
+					<to uri="direct:findUserDataXML" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataSymEnc'</simple>
+					<to uri="direct:findUserDataSymEnc" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataAsymEnc'</simple>
+					<to uri="direct:findUserDataAsymEnc" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataSymEncXML'</simple>
+					<to uri="direct:findUserDataSymEncXML" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataAsymEncXML'</simple>
+					<to uri="direct:findUserDataAsymEncXML" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataSign'</simple>
+					<to uri="direct:findUserDataSign" />
+				</when>
+				<otherwise>
+					<log message="unknown operation name: '${in.header.operationName}'" />
+				</otherwise>
+			</choice>
+		</route>
+
+		<route id="findUserData">
+			<from uri="direct:findUserData" />
+
+			<log message="findUserData" />
+
+			<convertBodyTo type="java.lang.Integer" />
+
+			<bean ref="userDataBean" method="loadUserData" />
+			<bean ref="categoryBean" method="processData" />
+		</route>
+
+		<route id="findUserDataXML">
+			<from uri="direct:findUserDataXML" />
+
+			<log message="findUserDataXML" />
+
+			<convertBodyTo type="java.lang.Integer" />
+
+			<bean ref="userDataBean" method="loadUserData" />
+			<bean ref="categoryBean" method="processData" />
+		</route>
+
+		<route id="findUserDataSymEnc">
+			<from uri="direct:findUserDataSymEnc" />
+
+			<log message="findUserDataSymEnc" />
+
+			<convertBodyTo type="java.lang.Integer" />
+
+			<bean ref="userDataBean" method="loadUserData" />
+			<bean ref="categoryBean" method="processData" />
+
+			<transform>
+				<method bean="xmlUtil" method="convertToXml" />
+			</transform>
+
+			<log message="BODY BEFORE SYMMETRIC ENCRYPTION: ${body}" />
+
+			<marshal ref="aes" />
+
+			<log message="BODY AFTER SYMMETRIC ENCRYPTION: ${body}" />
+
+			<transform>
+				<method bean="xmlUtil" method="convertToBase64" />
+			</transform>
+
+			<setHeader headerName="filetype">
+				<constant>txt</constant>
+			</setHeader>
+
+			<to uri="direct:writeFile" />
+<!-- 
+			<log message="BODY AFTER TRANSFORMATION: ${body}" /> 
+			
+			<transform> 
+				<method bean="xmlUtil" method="convertToByte" /> 
+			</transform> 
+			
+			<log message="BODY AFTER TRANSFORMATION: ${body}" /> 
+			
+			<unmarshal ref="aes" /> 
+			
+			<log message="BODY AFTER SYMMETRIC DECRYPTION: ${body}" /> 
+-->
+
+			<!-- required, otherwise ClassCastException -->
+			<convertBodyTo type="java.lang.String" />
+		</route>
+
+		<route id="findUserDataAsymEnc">
+			<from uri="direct:findUserDataAsymEnc" />
+
+			<log message="findUserDataAsymEnc" />
+
+			<convertBodyTo type="java.lang.Integer" />
+
+			<bean ref="userDataBean" method="loadUserData" />
+			<bean ref="categoryBean" method="processData" />
+
+			<transform>
+				<method bean="xmlUtil" method="convertToXml" />
+			</transform>
+
+			<log message="BODY BEFORE ASYMMETRIC ENCRYPTION: ${body}" />
+
+			<marshal ref="asymmEncrypt" />
+
+			<log message="BODY AFTER ASYMMETRIC ENCRYPTION: ${body}" />
+
+			<transform>
+				<method bean="xmlUtil" method="convertToBase64" />
+			</transform>
+
+			<setHeader headerName="filetype">
+				<constant>txt</constant>
+			</setHeader>
+
+			<to uri="direct:writeFile" />
+<!-- 
+			<log message="BODY AFTER TRANSFORMATION: ${body}" />
+			
+			<transform>
+				<method bean="xmlUtil" method="convertToByte" />
+			</transform>
+			<log message="BODY AFTER TRANSFORMATION: ${body}" />
+				
+			<unmarshal ref="asymmDecrypt" />
+			
+			<log message="BODY AFTER ASYMMETRIC DECRYPTION: ${body}" />
+-->
+			<!-- required, otherwise ClassCastException -->
+			<convertBodyTo type="java.lang.String" />
+		</route>
+
+		<route id="findUserDataSymEncXML">
+			<from uri="direct:findUserDataSymEncXML" />
+
+			<log message="findUserDataSymEncXML" />
+
+			<convertBodyTo type="java.lang.Integer" />
+
+			<bean ref="userDataBean" method="loadUserData" />
+			<bean ref="categoryBean" method="processData" />
+
+			<transform>
+				<method bean="xmlUtil" method="convertToXml" />
+			</transform>
+
+			<to uri="direct:encryptSymmetricSocialSecurityNumberXML" />
+			<to uri="direct:encryptSymmetricCategoryXML" />
+
+			<to uri="direct:writeFile" />
+
+			<!-- required, otherwise ClassCastException -->
+			<convertBodyTo type="java.lang.String" />
+		</route>
+
+		<route id="findUserDataAsymEncXML">
+			<from uri="direct:findUserDataAsymEncXML" />
+
+			<log message="findUserDataAsymEncXML" />
+
+			<convertBodyTo type="java.lang.Integer" />
+
+			<bean ref="userDataBean" method="loadUserData" />
+			<bean ref="categoryBean" method="processData" />
+
+			<transform>
+				<method bean="xmlUtil" method="convertToXml" />
+			</transform>
+
+			<to uri="direct:writeFile" />
+
+			<to uri="direct:encryptAsymmetricXML" />
+
+			<!-- required, otherwise ClassCastException -->
+			<convertBodyTo type="java.lang.String" />
+		</route>
+		
+		<route id="findUserDataSign">
+		    <from uri="direct:findUserDataSign"/>
+
+			<log message="findUserDataSign" />
+
+			<convertBodyTo type="java.lang.String" />
+			
+			<log message="HEADER BEFORE SIGNATURE: ${headers}" />
+		    <to uri="crypto:sign://keystore?keystore=#signatureStore&amp;alias=camelsign&amp;password=camelsec" />
+			<log message="HEADER AFTER SIGNATURE: ${headers}" />
+		    <to uri="crypto:verify://keystore?keystore=#signatureStore&amp;alias=camelsign" />
+			<log message="HEADER AFTER VERIFICATION: ${headers}" />
+		    <to uri="mock:result"/>
+		</route> 
+
+		<route id="writeFile">
+			<from uri="direct:writeFile" />
+
+			<choice>
+				<when>
+					<simple>${headers.filetype} == null</simple>
+					<setHeader headerName="filetype">
+						<constant>xml</constant>
+					</setHeader>
+				</when>
+			</choice>
+
+			<to uri="file:C:/Files/out?fileName=${id}.${headers.filetype}" />
+		</route>
+
+		<route id="encryptSymmetricSocialSecurityNumberXML">
+			<from uri="direct:encryptSymmetricSocialSecurityNumberXML" />
+
+			<log message="BODY BEFORE SYMMETRIC XML ENCRYPTION: ${body}" />
+
+			<marshal>
+				<secureXML secureTagContents="true"
+					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+					passPhrase="My own really secret key" />
+			</marshal>
+
+			<log message="BODY AFTER SYMMETRIC XML ENCRYPTION: ${body}" />
+		</route>
+
+		<route id="encryptSymmetricCategoryXML">
+			<from uri="direct:encryptSymmetricCategoryXML" />
+
+			<log message="BODY BEFORE SYMMETRIC XML ENCRYPTION: ${body}" />
+
+			<marshal>
+				<secureXML secureTagContents="false" secureTag="/userData/category"
+					xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc"
+					passPhrase="Sym. category secret key" />
+			</marshal>
+
+			<log message="BODY AFTER SYMMETRIC XML ENCRYPTION: ${body}" />
+		</route>
+
+		<route id="decryptSymmetricXML">
+			<from uri="direct:decryptSymmetricXML" />
+
+			<log message="BODY BEFORE SYMMETRIC XML DECRYPTION: ${body}" />
+
+			<unmarshal>
+				<secureXML secureTag="/userData/socialSecurityNumber"
+					xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+					passPhrase="My own really secret key" />
+			</unmarshal>
+
+			<log message="BODY AFTER SYMMETRIC XML DECRYPTION: ${body}" />
+		</route>
+
+		<route id="encryptAsymmetricXML">
+			<from uri="direct:encryptAsymmetricXML" />
+
+			<log message="BODY BEFORE ASYMMETRIC XML ENCRYPTION: ${body}" />
+
+			<marshal>
+				<secureXML secureTagContents="true"
+					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes192-cbc"
+					keyCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"
+					recipientKeyAlias="rsaCamelSec" keyOrTrustStoreParametersId="keyStore" />
+			</marshal>
+
+			<log message="BODY AFTER ASYMMETRIC XML ENCRYPTION: ${body}" />
+		</route>
+
+		<route id="decryptAsymmetricXML">
+			<from uri="direct:decryptAsymmetricXML" />
+
+			<log message="BODY BEFORE ASYMMETRIC XML DECRYPTION: ${body}" />
+
+			<unmarshal>
+				<secureXML secureTag="/userData/socialSecurityNumber"
+					xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+					keyCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"
+					recipientKeyAlias="rsaCamelSec" keyOrTrustStoreParametersId="keyStore" />
+			</unmarshal>
+
+			<log message="BODY AFTER ASYMMETRIC XML DECRYPTION: ${body}" />
+		</route>
+	</camelContext>
 
 </beans>

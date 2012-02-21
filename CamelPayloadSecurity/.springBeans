@@ -8,6 +8,8 @@
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
 		<config>src/main/resources/META-INF/spring/camel-context.xml</config>
+		<config>src/main/resources/META-INF/spring/services.cxf.xml</config>
+		<config>src/main/resources/META-INF/spring/beans.xml</config>
 	</configs>
 	<configSets>
 	</configSets>
