@@ -1,0 +1,1 @@
+Camel Security sample projects: payload and route security.
