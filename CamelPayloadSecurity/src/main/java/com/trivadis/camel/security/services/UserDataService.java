@@ -12,9 +12,6 @@ public interface UserDataService {
 	UserData findUserData(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
 	
 	@WebResult(name = "userData")
-	String findUserDataXML(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
-
-	@WebResult(name = "userData")
 	String findUserDataSymEncXML(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
 
 	@WebResult(name = "userData")

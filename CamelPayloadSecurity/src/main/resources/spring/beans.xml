@@ -11,7 +11,7 @@
 
 	<bean id="categoryBean" class="com.trivadis.camel.security.category.CategoryBean" />
 
-	<bean id="xmlUtil" class="com.trivadis.camel.security.util.XMLUtil" />
+	<bean id="converter" class="com.trivadis.camel.security.util.Converter" />
 
 	<bean id="desKey" class="com.trivadis.camel.security.crypto.KeyGeneration"
 		factory-method="getDesKey" />
