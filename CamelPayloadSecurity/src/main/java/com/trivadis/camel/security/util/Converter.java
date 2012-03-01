@@ -1,10 +1,12 @@
 package com.trivadis.camel.security.util;
 
+import java.io.InputStream;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import org.bouncycastle.util.encoders.Base64;
 
@@ -39,6 +41,17 @@ public class Converter {
 		}
 
 		return sw.toString();
+	}
+
+	public UserData convertXmlToUserData(InputStream source) {
+		try {
+			JAXBContext context = JAXBContext.newInstance(UserData.class);
+			Unmarshaller marshaller = context.createUnmarshaller();
+
+			return (UserData) marshaller.unmarshal(source);
+		} catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	public UserData convertToUserData(byte[] data) {
