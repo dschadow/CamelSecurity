@@ -16,8 +16,8 @@
 			<crypto id="des" algorithm="DES" keyRef="desKey" />
 			<crypto id="aes" algorithm="AES" keyRef="aesKey" />
 
-			<pgp id="asymmEncrypt" keyFileName="./pubring.gpg" keyUserid="camel@trivadis.com" />
-			<pgp id="asymmDecrypt" keyFileName="./secring.gpg" keyUserid="camel@trivadis.com" password="camelsec" />
+			<pgp id="asymEncrypt" keyFileName="./pubring.gpg" keyUserid="camel@trivadis.com" />
+			<pgp id="asymDecrypt" keyFileName="./secring.gpg" keyUserid="camel@trivadis.com" password="camelsec" />
 		</dataFormats>
 
 		<route id="userDataEndpoint">
@@ -90,7 +90,7 @@
 			
 			<convertBodyTo type="java.lang.String" />
 
-			<marshal ref="asymmEncrypt" />
+			<marshal ref="asymEncrypt" />
 
 			<transform>
 				<method bean="converter" method="convertToBase64" />
@@ -168,7 +168,7 @@
 						<method bean="converter" method="convertToByte" />
 					</transform>
 						
-					<unmarshal ref="asymmDecrypt" />
+					<unmarshal ref="asymDecrypt" />
 					
 					<transform>
 						<method bean="converter" method="convertToUserData" />
