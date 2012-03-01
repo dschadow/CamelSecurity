@@ -158,8 +158,9 @@
 					<transform>
 						<method bean="converter" method="convertToUserData" />
 					</transform>
-					
+
 					<bean ref="categoryBean" method="processData" />
+					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataAsymEnc'</simple>
@@ -169,7 +170,12 @@
 						
 					<unmarshal ref="asymmDecrypt" />
 					
+					<transform>
+						<method bean="converter" method="convertToUserData" />
+					</transform>
+					
 					<bean ref="categoryBean" method="processData" />
+					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSymEncXML'</simple>
