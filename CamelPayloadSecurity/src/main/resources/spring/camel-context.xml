@@ -209,8 +209,9 @@
 					<transform>
 						<method bean="converter" method="convertToUserData" />
 					</transform>
-					
+
 					<bean ref="categoryBean" method="processData" />
+					<convertBodyTo type="java.lang.String" />	
 				</when>
 			</choice>	
 		</route>
