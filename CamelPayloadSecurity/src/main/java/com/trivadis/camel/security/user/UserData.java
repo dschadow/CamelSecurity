@@ -2,7 +2,6 @@ package com.trivadis.camel.security.user;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -25,7 +24,6 @@ public class UserData implements Serializable {
 	private int socialSecurityNumber;
 	private int category;
 
-	@XmlElement
 	public String getCompany() {
 		return company;
 	}
@@ -34,7 +32,6 @@ public class UserData implements Serializable {
 		this.company = company;
 	}
 
-	@XmlElement
 	public String getFirstName() {
 		return firstName;
 	}
@@ -43,7 +40,6 @@ public class UserData implements Serializable {
 		this.firstName = firstName;
 	}
 
-	@XmlElement
 	public String getLastName() {
 		return lastName;
 	}
@@ -52,7 +48,6 @@ public class UserData implements Serializable {
 		this.lastName = lastName;
 	}
 
-	@XmlElement
 	public String getStreet() {
 		return street;
 	}
@@ -61,7 +56,6 @@ public class UserData implements Serializable {
 		this.street = street;
 	}
 
-	@XmlElement
 	public String getZip() {
 		return zip;
 	}
@@ -70,7 +64,6 @@ public class UserData implements Serializable {
 		this.zip = zip;
 	}
 
-	@XmlElement
 	public String getCity() {
 		return city;
 	}
@@ -79,7 +72,6 @@ public class UserData implements Serializable {
 		this.city = city;
 	}
 
-	@XmlElement
 	public String getCountry() {
 		return country;
 	}
@@ -88,7 +80,6 @@ public class UserData implements Serializable {
 		this.country = country;
 	}
 
-	@XmlElement
 	public int getSocialSecurityNumber() {
 		return socialSecurityNumber;
 	}
@@ -97,7 +88,6 @@ public class UserData implements Serializable {
 		this.socialSecurityNumber = socialSecurityNumber;
 	}
 
-	@XmlElement
 	public int getCategory() {
 		return category;
 	}
