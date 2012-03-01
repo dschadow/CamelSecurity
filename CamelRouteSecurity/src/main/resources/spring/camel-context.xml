@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/spring"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  	<import resource="classpath:spring/beans.xml" />
+	<import resource="classpath:spring/services.cxf.xml" />
+
+	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
+
+		<!-- call this endpoint in soapUI or Eclipse Web Service Explorer with 1234567890 as ssn parameter value -->
+		<route id="userDataEndpoint">
+			<from uri="cxf:bean:userDataEndpoint" />
+
+			<log message="userDataEndpoint operation: ${in.header.operationName}" />
+			
+			<!-- body always consists of an Integer value only -->
+			<convertBodyTo type="java.lang.Integer" />
+			<bean ref="userDataBean" method="loadUserData" />
+			
+			<choice>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataShiro'</simple>
+					<to uri="direct:findUserDataShiro" />
+				</when>
+				<when>
+					<simple>${in.header.operationName} == 'findUserDataSpring'</simple>
+					<to uri="direct:findUserDataSpring" />
+				</when>
+			</choice>
+			
+			<to uri="direct:calculateCategory" />
+		</route>
+		
+		<route id="categoryEndpoint">
+			<from uri="cxf:bean:categoryEndpoint" />
+
+			<log message="categoryEndpoint operation: ${in.header.operationName}" />
+			
+			<choice>
+				<when>
+					<simple>${in.header.operationName} == 'calculateCategory'</simple>
+					<to uri="direct:calculateCategory" />
+				</when>
+			</choice>
+		</route>
+
+		<route id="findUserDataShiro">
+			<from uri="direct:findUserDataShiro" />
+			
+		</route>
+
+		<route id="findUserDataSpring">
+			<from uri="direct:findUserDataSpring" />
+
+		</route>
+
+		<route id="calculateCategory">
+			<from uri="direct:calculateCategory" />
+			
+			<log message="body in calculateCategory: ${body}" />
+			<log message="header in calculateCategory: ${headers}" />
+
+			<bean ref="categoryBean" method="processData" />
+		</route>
+	</camelContext>
+
+</beans>
