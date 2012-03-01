@@ -104,7 +104,11 @@
 				<method bean="converter" method="convertToXml" />
 			</transform>
 
-			<to uri="direct:encryptSymmetricXML" />
+			<marshal>
+				<secureXML secureTagContents="true"
+					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+					passPhrase="My own really secret key" />
+			</marshal>
 		</route>
 
 		<route id="findUserDataAsymEncXML">
@@ -114,7 +118,12 @@
 				<method bean="converter" method="convertToXml" />
 			</transform>
 
-			<to uri="direct:encryptAsymmetricXML" />
+			<marshal>
+				<secureXML secureTagContents="true"
+					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes192-cbc"
+					keyCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"
+					recipientKeyAlias="rsaCamelSec" keyOrTrustStoreParametersId="keyStore" />
+			</marshal>
 		</route>
 		
 		<route id="findUserDataSign">
@@ -125,34 +134,19 @@
 		    <to uri="crypto:sign://keystore?keystore=#signatureStore&amp;alias=camelsign&amp;password=camelsec" />
 		</route> 
 
-		<route id="encryptSymmetricXML">
-			<from uri="direct:encryptSymmetricXML" />
-
-			<marshal>
-				<secureXML secureTagContents="true"
-					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
-					passPhrase="My own really secret key" />
-			</marshal>
-		</route>
-
-		<route id="encryptAsymmetricXML">
-			<from uri="direct:encryptAsymmetricXML" />
-
-			<marshal>
-				<secureXML secureTagContents="true"
-					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes192-cbc"
-					keyCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"
-					recipientKeyAlias="rsaCamelSec" keyOrTrustStoreParametersId="keyStore" />
-			</marshal>
-		</route>
-
 		<route id="calculateCategory">
 			<from uri="direct:calculateCategory" />
 			
 			<log message="body in calculateCategory: ${body}" />
+			<log message="header in calculateCategory: ${headers}" />
 			<log message="original operation: ${in.header.originalOperation}" />
 			
 			<choice>
+				<when>
+					<simple>${in.header.originalOperation} == 'findUserData'</simple>	
+					
+					<bean ref="categoryBean" method="processData" />
+				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSymEnc'</simple>			
 					<transform> 
@@ -164,6 +158,8 @@
 					<transform>
 						<method bean="converter" method="convertToUserData" />
 					</transform>
+					
+					<bean ref="categoryBean" method="processData" />
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataAsymEnc'</simple>
@@ -172,6 +168,8 @@
 					</transform>
 						
 					<unmarshal ref="asymmDecrypt" />
+					
+					<bean ref="categoryBean" method="processData" />
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSymEncXML'</simple>
@@ -180,6 +178,13 @@
 							xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
 							passPhrase="My own really secret key" />
 					</unmarshal>
+
+					<transform>
+						<method bean="converter" method="convertXmlToUserData" />
+					</transform>
+					
+					<bean ref="categoryBean" method="processData" />
+					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataAsymEncXML'</simple>
@@ -189,14 +194,25 @@
 							keyCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"
 							recipientKeyAlias="rsaCamelSec" keyOrTrustStoreParametersId="keyStore" />
 					</unmarshal>
+
+					<transform>
+						<method bean="converter" method="convertXmlToUserData" />
+					</transform>
+					
+					<bean ref="categoryBean" method="processData" />
+					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSign'</simple>
 		    		<to uri="crypto:verify://keystore?keystore=#signatureStore&amp;alias=camelsign" />
+
+					<transform>
+						<method bean="converter" method="convertToUserData" />
+					</transform>
+					
+					<bean ref="categoryBean" method="processData" />
 				</when>
-			</choice>
-			
-			<bean ref="categoryBean" method="processData" />
+			</choice>	
 		</route>
 	</camelContext>
 
