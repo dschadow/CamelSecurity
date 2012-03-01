@@ -20,6 +20,7 @@
 			<pgp id="asymDecrypt" keyFileName="./secring.gpg" keyUserid="camel@trivadis.com" password="camelsec" />
 		</dataFormats>
 
+		<!-- call this endpoint in soapUI or Eclipse Web Service Explorer with 1234567890 as ssn parameter value -->
 		<route id="userDataEndpoint">
 			<from uri="cxf:bean:userDataEndpoint" />
 
@@ -60,6 +61,7 @@
 			<to uri="direct:calculateCategory" />
 		</route>
 		
+		<!-- this endpoint is expected to be unsafe, data must be encrypted in request -->
 		<route id="categoryEndpoint">
 			<from uri="cxf:bean:categoryEndpoint" />
 
