@@ -10,7 +10,8 @@
 	<import resource="classpath:spring/services.cxf.xml" />
 
 	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
-
+		<contextScan />
+	
 		<!-- call this endpoint e.g. in soapUI or Eclipse Web Service Explorer with 1234567890 as ssn parameter value -->
 		<!-- http://localhost:8080/CamelRouteSecurity/userdata?wsdl -->
 		<route id="userDataEndpoint">
@@ -58,7 +59,7 @@
 			
 			<to uri="direct:calculateCategory" />
 		</route>
-
+<!-- 
 		<route id="findUserDataShiro">
 			<from uri="direct:findUserDataShiro" />
 			
@@ -67,7 +68,7 @@
 			
 			<to uri="direct:calculateCategory" />
 		</route>
-
+-->
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
 			
