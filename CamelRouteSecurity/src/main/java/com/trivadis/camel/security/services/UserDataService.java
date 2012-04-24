@@ -12,17 +12,8 @@ public interface UserDataService {
 	UserData findUserData(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
 	
 	@WebResult(name = "userData")
-	String findUserDataSymEncXML(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	UserData findUserDataShiro(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
 
 	@WebResult(name = "userData")
-	String findUserDataAsymEncXML(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
-
-	@WebResult(name = "userData")
-	String findUserDataSymEnc(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
-
-	@WebResult(name = "userData")
-	String findUserDataAsymEnc(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
-
-	@WebResult(name = "userData")
-	String findUserDataSign(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	UserData findUserDataSpring(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
 }
