@@ -15,7 +15,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<camel.version>2.9.1</camel.version>
-		<spring.version>3.0.6.RELEASE</spring.version>
+		<spring.version>3.0.7.RELEASE</spring.version>
 	</properties>
 
 	<dependencies>
