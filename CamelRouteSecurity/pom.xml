@@ -44,7 +44,13 @@
 			<artifactId>camel-spring-security</artifactId>
 			<version>${camel.version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test</artifactId>
+			<version>${camel.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
