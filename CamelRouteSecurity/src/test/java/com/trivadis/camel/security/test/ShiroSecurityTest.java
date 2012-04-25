@@ -1,5 +1,6 @@
 package com.trivadis.camel.security.test;
 
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.component.shiro.security.ShiroSecurityToken;
 import org.apache.camel.component.shiro.security.ShiroSecurityTokenInjector;
 import org.apache.camel.test.junit4.CamelSpringTestSupport;
@@ -31,6 +32,11 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
         ShiroSecurityTokenInjector shiroSecurityTokenInjector = 
             new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
         template.sendBodyAndHeader("direct:findUserDataShiro", 1234567890, "SHIRO_SECURITY_TOKEN", shiroSecurityTokenInjector.encrypt());
+    }
+
+	@Test(expected=CamelExecutionException.class)
+    public void testShiroRouteWithoutToken() throws Exception {        
+        template.sendBody("direct:findUserDataShiro", 1234567890);
     }
 
 	@Override
