@@ -73,7 +73,7 @@
 			<bean ref="userDataBean" method="loadUserData" />	
 			
 			
-			<to uri="direct:calculateCategory" />
+			<to uri="direct:calculateCategorySpring" />
 		</route>
 
 		<route id="calculateCategory">
@@ -94,6 +94,15 @@
 			<bean ref="categoryBean" method="processData" />
 		</route>
 -->		
+
+		<route id="calculateCategorySpring">
+			<from uri="direct:calculateCategorySpring" />
+			
+			<log message="body in calculateCategorySpring ${body}" />
+			<log message="header in calculateCategorySpring ${headers}" />
+
+			<bean ref="categoryBean" method="processData" />
+		</route>
 	</camelContext>
 
 </beans>
