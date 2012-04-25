@@ -19,10 +19,7 @@ public class CategoryShiroRouteBuilder extends SpringRouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        final byte[] passPhrase =
-            {(byte) 0x08, (byte) 0x09, (byte) 0x0A, (byte) 0x0B, (byte) 0x0C, (byte) 0x0D, (byte) 0x0E,
-                    (byte) 0x0F, (byte) 0x10, (byte) 0x11, (byte) 0x12, (byte) 0x13, (byte) 0x14, (byte) 0x15,
-                    (byte) 0x16, (byte) 0x17};
+        final byte[] passPhrase = "CamelSecureRoute".getBytes();
 
     List<Permission> permissionsList = new ArrayList<Permission>();
     Permission permission = new WildcardPermission("trivadis:calculateCategory:*");
