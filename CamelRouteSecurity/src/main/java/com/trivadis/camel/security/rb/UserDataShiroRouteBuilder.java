@@ -13,6 +13,13 @@ import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.permission.WildcardPermission;
 import org.springframework.stereotype.Component;
 
+/**
+ * Java RouteBuilder implementation for the findUserDataShiro route. This route requires the
+ * <b>trivadis:findUserDataShiro:*</b> permission.
+ * 
+ * @author Dominik Schadow, Trivadis GmbH
+ * @version 1.0.0
+ */
 @Component
 public class UserDataShiroRouteBuilder extends SpringRouteBuilder {
     // TODO configuration via XML?

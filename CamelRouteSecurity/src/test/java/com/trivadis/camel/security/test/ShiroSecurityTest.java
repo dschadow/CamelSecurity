@@ -13,6 +13,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.trivadis.camel.security.user.UserData;
 
+/**
+ * JUnit tests for the Shiro-Security routes.
+ *
+ * @author Dominik Schadow, Trivadis GmbH
+ * @version 1.0.0
+ *
+ */
 public class ShiroSecurityTest extends CamelSpringTestSupport {
     private final byte[] passPhrase = "CamelSecureRoute".getBytes();
     private static final String USERDATA_COMPLETE =

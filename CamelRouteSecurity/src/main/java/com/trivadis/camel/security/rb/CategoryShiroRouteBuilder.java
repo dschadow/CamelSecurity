@@ -14,6 +14,13 @@ import org.apache.shiro.authz.Permission;
 import org.apache.shiro.authz.permission.WildcardPermission;
 import org.springframework.stereotype.Component;
 
+/**
+ * Java RouteBuilder implementation for the calculateCategoryShiro route. This route requires the
+ * <b>trivadis:calculateCategory:*</b> permission.
+ * 
+ * @author Dominik Schadow, Trivadis GmbH
+ * @version 1.0.0
+ */
 @Component
 public class CategoryShiroRouteBuilder extends SpringRouteBuilder {
     // TODO configuration via XML?
