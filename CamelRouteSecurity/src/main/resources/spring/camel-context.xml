@@ -12,8 +12,6 @@
 	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<contextScan />
 	
-		<!-- call this endpoint e.g. in soapUI or Eclipse Web Service Explorer with 1234567890 as ssn parameter value -->
-		<!-- http://localhost:8080/CamelRouteSecurity/userdata?wsdl -->
 		<route id="userDataEndpoint">
 			<from uri="cxf:bean:userDataEndpoint" />
 
@@ -59,7 +57,7 @@
 			
 			<to uri="direct:calculateCategory" />
 		</route>
-<!-- 
+<!-- see UserDataShiroRouteBuilder class
 		<route id="findUserDataShiro">
 			<from uri="direct:findUserDataShiro" />
 			
@@ -86,7 +84,7 @@
 
 			<bean ref="categoryBean" method="processData" />
 		</route>
-<!-- 
+<!-- see CategoryShiroRouteBuilder class
 		<route id="calculateCategoryShiro">
 			<from uri="direct:calculateCategorShiro" />
 			
