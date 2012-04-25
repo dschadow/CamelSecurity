@@ -11,8 +11,14 @@ import org.junit.Test;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.trivadis.camel.security.user.UserData;
+
 public class ShiroSecurityTest extends CamelSpringTestSupport {
     private final byte[] passPhrase = "CamelSecureRoute".getBytes();
+    private static final String USERDATA_COMPLETE =
+            "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 49";
+    private static final String USERDATA_PARTIAL =
+            "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 0";
 
     @Test
     public void testShiroRouteWithValidUser() throws Exception {
@@ -20,8 +26,24 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
 
         ShiroSecurityTokenInjector shiroSecurityTokenInjector =
                 new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
-        template.sendBodyAndHeader("direct:findUserDataShiro", 1234567890, "SHIRO_SECURITY_TOKEN",
-                shiroSecurityTokenInjector.encrypt());
+        UserData userData =
+                template.requestBodyAndHeader("direct:findUserDataShiro", 1234567890, "SHIRO_SECURITY_TOKEN",
+                        shiroSecurityTokenInjector.encrypt(), UserData.class);
+
+        assertEquals(USERDATA_COMPLETE, userData.toString());
+    }
+
+    @Test
+    public void testShiroRouteWithPartialValidUser() throws Exception {
+        ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userAgent", "secret1");
+
+        ShiroSecurityTokenInjector shiroSecurityTokenInjector =
+                new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
+        UserData userData =
+                template.requestBodyAndHeader("direct:findUserDataShiro", 1234567890, "SHIRO_SECURITY_TOKEN",
+                        shiroSecurityTokenInjector.encrypt(), UserData.class);
+
+        assertEquals(USERDATA_PARTIAL, userData.toString());
     }
 
     @Test
