@@ -3,6 +3,7 @@ package com.trivadis.camel.security.rb;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.camel.CamelAuthorizationException;
 import org.apache.camel.component.shiro.security.ShiroSecurityPolicy;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.shiro.authc.AuthenticationException;
@@ -21,19 +22,20 @@ public class CategoryShiroRouteBuilder extends SpringRouteBuilder {
     public void configure() throws Exception {
         final byte[] passPhrase = "CamelSecureRoute".getBytes();
 
-    List<Permission> permissionsList = new ArrayList<Permission>();
-    Permission permission = new WildcardPermission("trivadis:calculateCategory:*");
-    permissionsList.add(permission);
+        List<Permission> permissionsList = new ArrayList<Permission>();
+        Permission permission = new WildcardPermission("trivadis:calculateCategory:*");
+        permissionsList.add(permission);
 
-    ShiroSecurityPolicy shiroSecurityPolicy =
-            new ShiroSecurityPolicy("classpath:shirosecuritypolicy.ini", passPhrase, true, permissionsList);
+        ShiroSecurityPolicy shiroSecurityPolicy =
+                new ShiroSecurityPolicy("classpath:shirosecuritypolicy.ini", passPhrase, true, permissionsList);
 
-    onException(UnknownAccountException.class).to("mock:authenticationException");
-    onException(IncorrectCredentialsException.class).to("mock:authenticationException");
-    onException(LockedAccountException.class).to("mock:authenticationException");
-    onException(AuthenticationException.class).to("mock:authenticationException");
+        onException(UnknownAccountException.class).to("mock:authenticationException");
+        onException(IncorrectCredentialsException.class).to("mock:authenticationException");
+        onException(LockedAccountException.class).to("mock:authenticationException");
+        onException(AuthenticationException.class).to("mock:authenticationException");
+        onException(CamelAuthorizationException.class).handled(true);
 
-    from("direct:calculateCategoryShiro").routeId("calculateCategoryShiro").policy(shiroSecurityPolicy).beanRef(
-            "categoryBean", "processData");
+        from("direct:calculateCategoryShiro").routeId("calculateCategoryShiro").policy(shiroSecurityPolicy).beanRef(
+                "categoryBean", "processData");
     }
 }
