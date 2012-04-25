@@ -10,20 +10,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ShiroSecurityRouteBuilder extends SpringRouteBuilder {
-    private ShiroSecurityPolicy shiroSecurityPolicy = new ShiroSecurityPolicy("classpath:shirosecuritypolicy.ini");
+	// TODO configuration via XML?
 
-    // TODO configuration via XML?
-    
-    // TODO policy options (different rights not working)
-    
-    @Override
-    public void configure() throws Exception {
-        onException(UnknownAccountException.class).to("mock:authenticationException");
-        onException(IncorrectCredentialsException.class).to("mock:authenticationException");
-        onException(LockedAccountException.class).to("mock:authenticationException");
-        onException(AuthenticationException.class).to("mock:authenticationException");
+	// TODO policy options (different rights not working)
 
-        from("direct:findUserDataShiro").policy(shiroSecurityPolicy).beanRef("userDataBean", "loadUserData")
-                .to("direct:calculateCategory");
-    }
+	@Override
+	public void configure() throws Exception {
+		ShiroSecurityPolicy shiroSecurityPolicy = new ShiroSecurityPolicy(
+				"classpath:shirosecuritypolicy.ini");
+
+		onException(UnknownAccountException.class).to(
+				"mock:authenticationException");
+		onException(IncorrectCredentialsException.class).to(
+				"mock:authenticationException");
+		onException(LockedAccountException.class).to(
+				"mock:authenticationException");
+		onException(AuthenticationException.class).to(
+				"mock:authenticationException");
+
+		from("direct:findUserDataShiro").routeId("findUserDataShiro")
+				.policy(shiroSecurityPolicy)
+				.beanRef("userDataBean", "loadUserData")
+				.to("direct:calculateCategory");
+	}
 }
