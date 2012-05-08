@@ -107,6 +107,11 @@
 			</transform>
 
 			<marshal>
+				<!-- 
+					Attention: using 192 or 256 bit key size requires installation of the
+					Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files
+					http://www.oracle.com/technetwork/java/javase/downloads/index.html 
+				-->
 				<secureXML secureTagContents="true"
 					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
 					passPhrase="My own really secret key" />
@@ -121,6 +126,11 @@
 			</transform>
 
 			<marshal>
+				<!-- 
+					Attention: using 192 or 256 bit key size requires installation of the
+					Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files
+					http://www.oracle.com/technetwork/java/javase/downloads/index.html 
+				-->
 				<secureXML secureTagContents="true"
 					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes192-cbc"
 					keyCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5"
