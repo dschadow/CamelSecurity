@@ -111,6 +111,7 @@
 					Attention: using 192 or 256 bit key size requires installation of the
 					Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files
 					http://www.oracle.com/technetwork/java/javase/downloads/index.html 
+					Without installation, only 128 bit are available
 				-->
 				<secureXML secureTagContents="true"
 					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes256-cbc"
@@ -130,6 +131,7 @@
 					Attention: using 192 or 256 bit key size requires installation of the
 					Java Cryptography Extension (JCE) Unlimited Strength Jurisdiction Policy Files
 					http://www.oracle.com/technetwork/java/javase/downloads/index.html 
+					Without installation, only 128 bit are available
 				-->
 				<secureXML secureTagContents="true"
 					secureTag="/userData/socialSecurityNumber" xmlCipherAlgorithm="http://www.w3.org/2001/04/xmlenc#aes192-cbc"
