@@ -1,25 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:camel="http://camel.apache.org/schema/spring"
-       xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
+	xmlns:spring-security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+       http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd">
 
-  	<import resource="classpath:spring/beans.xml" />
+	<import resource="classpath:spring/beans.xml" />
 	<import resource="classpath:spring/services.cxf.xml" />
+       
+    <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <property name="allowIfAllAbstainDecisions" value="true"/>
+        <property name="decisionVoters">
+            <list>
+                <bean class="org.springframework.security.access.vote.RoleVoter"/>
+            </list>
+        </property>
+    </bean>
+    
+    <spring-security:authentication-manager alias="authenticationManager">
+    	<spring-security:authentication-provider user-service-ref="userDetailsService"/>
+    </spring-security:authentication-manager>
+   
+    <spring-security:user-service id="userDetailsService">
+        <spring-security:user name="userAgent" password="secret1" authorities="ROLE_AGENT"/>
+        <spring-security:user name="userEditor" password="secret2" authorities="ROLE_EDITOR"/>
+        <spring-security:user name="userAdmin" password="secret3" authorities="ROLE_ADMIN"/>
+    </spring-security:user-service>
+    
+    <authorizationPolicy id="agent" access="ROLE_AGENT"
+                         authenticationManager="authenticationManager"
+                         accessDecisionManager="accessDecisionManager"
+                         xmlns="http://camel.apache.org/schema/spring-security"/>
+    
+    <authorizationPolicy id="editor" access="ROLE_EDITOR"
+                         authenticationManager="authenticationManager"
+                         accessDecisionManager="accessDecisionManager"
+                         xmlns="http://camel.apache.org/schema/spring-security"/>
+    
+    <authorizationPolicy id="admin" access="ROLE_ADMIN"
+                         authenticationManager="authenticationManager"
+                         accessDecisionManager="accessDecisionManager"
+                         xmlns="http://camel.apache.org/schema/spring-security"/>
 
 	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<contextScan />
-	
+
 		<route id="userDataEndpoint">
 			<from uri="cxf:bean:userDataEndpoint" />
 
 			<log message="userDataEndpoint operation: ${in.header.operationName}" />
-			
+
 			<!-- body always consists of an Integer value only -->
 			<convertBodyTo type="java.lang.Integer" />
-			
+
 			<choice>
 				<when>
 					<simple>${in.header.operationName} == 'findUserData'</simple>
@@ -35,74 +71,63 @@
 				</when>
 			</choice>
 		</route>
-		
-		<route id="categoryEndpoint">
-			<from uri="cxf:bean:categoryEndpoint" />
-
-			<log message="categoryEndpoint operation: ${in.header.operationName}" />
-			
-			<choice>
-				<when>
-					<simple>${in.header.operationName} == 'calculateCategory'</simple>
-					<to uri="direct:calculateCategory" />
-				</when>
-			</choice>
-		</route>
 
 		<!-- insecure method, open for all users and groups -->
 		<route id="findUserData">
 			<from uri="direct:findUserData" />
-			
-			<bean ref="userDataBean" method="loadUserData" />			
-			
+
+			<bean ref="userDataBean" method="loadUserData" />
+
 			<to uri="direct:calculateCategory" />
 		</route>
-<!-- see UserDataShiroRouteBuilder class
-		<route id="findUserDataShiro">
-			<from uri="direct:findUserDataShiro" />
-			
-			<bean ref="userDataBean" method="loadUserData" />	
-			
-			
-			<to uri="direct:calculateShiroCategory" />
+		
+		<!-- see UserDataShiroRouteBuilder class 
+		<route id="findUserDataShiro"> 
+			<from uri="direct:findUserDataShiro" /> 
+			<bean ref="userDataBean" method="loadUserData" />
+			<to uri="direct:calculateShiroCategory" /> 
 		</route>
--->
+		-->
+		
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
-			
-			<bean ref="userDataBean" method="loadUserData" />	
-			
-			
-			<to uri="direct:calculateCategorySpring" />
+
+			<policy ref="agent, editor, admin">
+				<bean ref="userDataBean" method="loadUserData" />
+	
+				<to uri="direct:calculateCategorySpring" />
+			</policy>
 		</route>
 
 		<route id="calculateCategory">
 			<from uri="direct:calculateCategory" />
-			
+
 			<log message="body in calculateCategory: ${body}" />
 			<log message="header in calculateCategory: ${headers}" />
 
 			<bean ref="categoryBean" method="processData" />
 		</route>
-<!-- see CategoryShiroRouteBuilder class
-		<route id="calculateCategoryShiro">
+		
+		<!-- see CategoryShiroRouteBuilder class 
+		<route id="calculateCategoryShiro"> 
 			<from uri="direct:calculateCategorShiro" />
+			 
+			<log message="body in calculateCategoryShiro ${body}" /> 
+			<log message="header in calculateCategoryShiro ${headers}" /> 
 			
-			<log message="body in calculateCategoryShiro ${body}" />
-			<log message="header in calculateCategoryShiro ${headers}" />
-
 			<bean ref="categoryBean" method="processData" />
 		</route>
--->		
+		-->
 
 		<route id="calculateCategorySpring">
 			<from uri="direct:calculateCategorySpring" />
 			
-			<log message="body in calculateCategorySpring ${body}" />
-			<log message="header in calculateCategorySpring ${headers}" />
-
-			<bean ref="categoryBean" method="processData" />
+			<policy ref="editor, admin">
+				<log message="body in calculateCategorySpring ${body}" />
+				<log message="header in calculateCategorySpring ${headers}" />
+	
+				<bean ref="categoryBean" method="processData" />
+			</policy>
 		</route>
 	</camelContext>
-
 </beans>
