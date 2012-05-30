@@ -1,68 +1,84 @@
 package com.trivadis.camel.security.test;
 
+import javax.security.auth.Subject;
+
+import org.apache.camel.CamelAuthorizationException;
 import org.apache.camel.CamelExecutionException;
-import org.apache.camel.component.shiro.security.ShiroSecurityToken;
-import org.apache.camel.component.shiro.security.ShiroSecurityTokenInjector;
+import org.apache.camel.Exchange;
 import org.apache.camel.test.junit4.CamelSpringTestSupport;
-import org.apache.shiro.authc.IncorrectCredentialsException;
-import org.apache.shiro.authc.UnknownAccountException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import com.trivadis.camel.security.user.UserData;
 
 /**
- * JUnit tests for the Spring-Security routes.
- *
+ * JUnit tests for the routes protected by Spring Security.
+ * 
  * @author Dominik Schadow, Trivadis GmbH
  * @version 1.0.0
  */
 public class SpringSecurityTest extends CamelSpringTestSupport {
-    private final byte[] passPhrase = "CamelSecureRoute".getBytes();
-    private static final String USERDATA_COMPLETE =
-            "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 49";
-    private static final String USERDATA_PARTIAL =
-            "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 0";
+    private static final String USERDATA_COMPLETE = "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 49";
+    private static final String USERDATA_PARTIAL = "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 0";
 
     @Test
-    public void testSpringRouteWithValidUser() throws Exception {
-        ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userEditor", "secret2");
+    public void testRouteWithValidUser() throws Exception {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("userEditor", "secret2");
 
-        ShiroSecurityTokenInjector shiroSecurityTokenInjector =
-                new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
-        UserData userData =
-                template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890, "SHIRO_SECURITY_TOKEN",
-                        shiroSecurityTokenInjector.encrypt(), UserData.class);
+        Subject subject = new Subject();
+        subject.getPrincipals().add(token);
+
+        UserData userData = template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890,
+                Exchange.AUTHENTICATION, subject, UserData.class);
 
         assertEquals(USERDATA_COMPLETE, userData.toString());
     }
 
     @Test
-    public void testSpringRouteWithPartialValidUser() throws Exception {
-        ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userAgent", "secret1");
+    public void testFirstRouteWithValidUser() throws Exception {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("userAgent", "secret1");
 
-        ShiroSecurityTokenInjector shiroSecurityTokenInjector =
-                new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
-        UserData userData =
-                template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890, "SHIRO_SECURITY_TOKEN",
-                        shiroSecurityTokenInjector.encrypt(), UserData.class);
+        Subject subject = new Subject();
+        subject.getPrincipals().add(token);
+
+        UserData userData = template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890,
+                Exchange.AUTHENTICATION, subject, UserData.class);
 
         assertEquals(USERDATA_PARTIAL, userData.toString());
     }
 
     @Test
-    public void testSpringRouteWithInvalidUser() throws Exception {
+    public void testRouteWithInvalidPassword() throws Exception {
         try {
-            ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userAgent", "secret");
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("userAgent", "secret");
 
-            ShiroSecurityTokenInjector shiroSecurityTokenInjector =
-                    new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
-            template.sendBodyAndHeader("direct:findUserDataSpring", 1234567890, "SHIRO_SECURITY_TOKEN",
-                    shiroSecurityTokenInjector.encrypt());
+            Subject subject = new Subject();
+            subject.getPrincipals().add(token);
+
+            template.sendBodyAndHeader("direct:findUserDataSpring", 1234567890, Exchange.AUTHENTICATION, subject);
         } catch (CamelExecutionException ex) {
-            if (ex.getCause() instanceof IncorrectCredentialsException) {
+            if (ex.getCause() instanceof CamelAuthorizationException) {
+                // OK
+            } else {
+                Assert.fail(ex.getMessage());
+            }
+        }
+    }
+
+    @Test
+    public void testRouteWithUnknownUser() throws Exception {
+        try {
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("fake", "fake");
+
+            Subject subject = new Subject();
+            subject.getPrincipals().add(token);
+
+            template.sendBodyAndHeader("direct:findUserDataSpring", 1234567890, Exchange.AUTHENTICATION, subject);
+        } catch (CamelExecutionException ex) {
+            if (ex.getCause() instanceof CamelAuthorizationException) {
                 // OK
             } else {
                 Assert.fail(ex.getMessage());
@@ -71,26 +87,8 @@ public class SpringSecurityTest extends CamelSpringTestSupport {
     }
 
     @Test(expected = CamelExecutionException.class)
-    public void testSpringRouteWithoutToken() throws Exception {
+    public void testRouteWithoutToken() throws Exception {
         template.sendBody("direct:findUserDataSpring", 1234567890);
-    }
-
-    @Test
-    public void testSpringRouteWithUnknownUser() throws Exception {
-        try {
-            ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("myUser", "mySecret");
-
-            ShiroSecurityTokenInjector shiroSecurityTokenInjector =
-                    new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
-            template.sendBodyAndHeader("direct:findUserDataSpring", 1234567890, "SHIRO_SECURITY_TOKEN",
-                    shiroSecurityTokenInjector.encrypt());
-        } catch (CamelExecutionException ex) {
-            if (ex.getCause() instanceof UnknownAccountException) {
-                // OK
-            } else {
-                Assert.fail(ex.getMessage());
-            }
-        }
     }
 
     @Override
