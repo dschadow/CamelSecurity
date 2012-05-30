@@ -34,7 +34,7 @@ public class SpringSecurityTest extends CamelSpringTestSupport {
         UserData userData = template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890,
                 Exchange.AUTHENTICATION, subject, UserData.class);
 
-        assertEquals(USERDATA_COMPLETE, userData.toString());
+        assertEquals(USERDATA_PARTIAL, userData.toString());
     }
     
     @Test

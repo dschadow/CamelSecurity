@@ -44,9 +44,17 @@
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
+                         
+    <bean id="accessDeniedResponse" class="com.trivadis.camel.security.processors.AccessDeniedProcessor" />
 
 	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<contextScan />
+		
+		<onException>
+			<exception>org.springframework.security.access.AccessDeniedException</exception>
+			<handled><constant>true</constant></handled>
+			<process ref="accessDeniedResponse" />
+		</onException>
 
 		<route id="userDataEndpoint">
 			<from uri="cxf:bean:userDataEndpoint" />
@@ -92,7 +100,7 @@
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
 
-			<policy ref="agent">
+			<policy ref="agent" >
 				<bean ref="userDataBean" method="loadUserData" />
 	
 				<to uri="direct:calculateCategorySpring" />
