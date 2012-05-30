@@ -27,7 +27,7 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
             "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 0";
 
     @Test
-    public void testShiroRouteWithValidUser() throws Exception {
+    public void testCompleteRouteWithValidUser() throws Exception {
         ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userEditor", "secret2");
 
         ShiroSecurityTokenInjector shiroSecurityTokenInjector =
@@ -40,7 +40,7 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
     }
 
     @Test
-    public void testShiroRouteWithPartialValidUser() throws Exception {
+    public void testFirstRouteWithValidUser() throws Exception {
         ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userAgent", "secret1");
 
         ShiroSecurityTokenInjector shiroSecurityTokenInjector =
@@ -53,7 +53,20 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
     }
 
     @Test
-    public void testShiroRouteWithInvalidUser() throws Exception {
+    public void testSecondRouteWithInvalidUser() throws Exception {
+        ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userAgent", "secret1");
+
+        ShiroSecurityTokenInjector shiroSecurityTokenInjector =
+                new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
+        UserData userData =
+                template.requestBodyAndHeader("direct:calculateCategoryShiro", 1234567890, "SHIRO_SECURITY_TOKEN",
+                        shiroSecurityTokenInjector.encrypt(), UserData.class);
+
+        assertNull(userData);
+    }
+
+    @Test
+    public void testRouteWithInvalidPassword() throws Exception {
         try {
             ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("userAgent", "secret");
 
@@ -70,13 +83,8 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
         }
     }
 
-    @Test(expected = CamelExecutionException.class)
-    public void testShiroRouteWithoutToken() throws Exception {
-        template.sendBody("direct:findUserDataShiro", 1234567890);
-    }
-
     @Test
-    public void testShiroRouteWithUnknownUser() throws Exception {
+    public void testRouteWithUnknownUser() throws Exception {
         try {
             ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("myUser", "mySecret");
 
@@ -91,6 +99,11 @@ public class ShiroSecurityTest extends CamelSpringTestSupport {
                 Assert.fail(ex.getMessage());
             }
         }
+    }
+    
+    @Test(expected = CamelExecutionException.class)
+    public void testRouteWithoutToken() throws Exception {
+        template.sendBody("direct:findUserDataShiro", 1234567890);
     }
 
     @Override
