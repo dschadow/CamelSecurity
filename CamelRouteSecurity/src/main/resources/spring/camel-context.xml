@@ -92,7 +92,19 @@
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
 
-			<policy ref="agent, editor, admin">
+			<policy ref="agent">
+				<bean ref="userDataBean" method="loadUserData" />
+	
+				<to uri="direct:calculateCategorySpring" />
+			</policy>
+
+			<policy ref="editor">
+				<bean ref="userDataBean" method="loadUserData" />
+	
+				<to uri="direct:calculateCategorySpring" />
+			</policy>
+
+			<policy ref="admin">
 				<bean ref="userDataBean" method="loadUserData" />
 	
 				<to uri="direct:calculateCategorySpring" />
@@ -122,7 +134,14 @@
 		<route id="calculateCategorySpring">
 			<from uri="direct:calculateCategorySpring" />
 			
-			<policy ref="editor, admin">
+			<policy ref="editor">
+				<log message="body in calculateCategorySpring ${body}" />
+				<log message="header in calculateCategorySpring ${headers}" />
+	
+				<bean ref="categoryBean" method="processData" />
+			</policy>
+			
+			<policy ref="admin">
 				<log message="body in calculateCategorySpring ${body}" />
 				<log message="header in calculateCategorySpring ${headers}" />
 	
