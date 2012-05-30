@@ -86,9 +86,17 @@ public class SpringSecurityTest extends CamelSpringTestSupport {
         }
     }
 
-    @Test(expected = CamelExecutionException.class)
+    @Test
     public void testRouteWithoutToken() throws Exception {
-        template.sendBody("direct:findUserDataSpring", 1234567890);
+        try {
+            template.requestBody("direct:findUserDataSpring", 1234567890);
+        } catch (CamelExecutionException ex) {
+            if (ex.getCause() instanceof CamelAuthorizationException) {
+                // OK
+            } else {
+                Assert.fail(ex.getMessage());
+            }
+        }
     }
 
     @Override
