@@ -14,7 +14,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import com.trivadis.camel.security.user.UserData;
 
 /**
- * JUnit tests for the Shiro routes.
+ * JUnit tests for the routes protected by Apache Shiro.
  *
  * @author Dominik Schadow, Trivadis GmbH
  * @version 1.0.0
@@ -86,7 +86,7 @@ public class ShiroTest extends CamelSpringTestSupport {
     @Test
     public void testRouteWithUnknownUser() throws Exception {
         try {
-            ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("myUser", "mySecret");
+            ShiroSecurityToken shiroSecurityToken = new ShiroSecurityToken("fake", "fake");
 
             ShiroSecurityTokenInjector shiroSecurityTokenInjector =
                     new ShiroSecurityTokenInjector(shiroSecurityToken, passPhrase);
