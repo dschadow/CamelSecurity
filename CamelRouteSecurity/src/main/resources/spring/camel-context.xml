@@ -30,12 +30,12 @@
         <spring-security:user name="userAdmin" password="secret3" authorities="ROLE_ADMIN"/>
     </spring-security:user-service>
     
-    <authorizationPolicy id="agent" access="ROLE_AGENT"
+    <authorizationPolicy id="agent" access="ROLE_AGENT, ROLE_EDITOR, ROLE_ADMIN"
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
     
-    <authorizationPolicy id="editor" access="ROLE_EDITOR"
+    <authorizationPolicy id="editor" access="ROLE_EDITOR, ROLE_ADMIN"
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
@@ -91,29 +91,12 @@
 		
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
-<log message="direct:findUserDataSpring" />
-<!-- 
+
 			<policy ref="agent">
-<log message="AGENT" />			
 				<bean ref="userDataBean" method="loadUserData" />
 	
 				<to uri="direct:calculateCategorySpring" />
 			</policy>
--->
-			<policy ref="editor">
-<log message="EDITOR" />			
-				<bean ref="userDataBean" method="loadUserData" />
-	
-				<to uri="direct:calculateCategorySpring" />
-			</policy>
-<!-- 
-			<policy ref="admin">
-<log message="ADMIN" />			
-				<bean ref="userDataBean" method="loadUserData" />
-	
-				<to uri="direct:calculateCategorySpring" />
-			</policy>
--->
 		</route>
 
 		<route id="calculateCategory">
@@ -145,14 +128,6 @@
 	
 				<bean ref="categoryBean" method="processData" />
 			</policy>
-<!-- 			
-			<policy ref="admin">
-				<log message="body in calculateCategorySpring ${body}" />
-				<log message="header in calculateCategorySpring ${headers}" />
-	
-				<bean ref="categoryBean" method="processData" />
-			</policy>
--->			
 		</route>
 	</camelContext>
 </beans>
