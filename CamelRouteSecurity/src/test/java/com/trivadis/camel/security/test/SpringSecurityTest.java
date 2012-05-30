@@ -25,8 +25,34 @@ public class SpringSecurityTest extends CamelSpringTestSupport {
     private static final String USERDATA_PARTIAL = "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 0";
 
     @Test
-    public void testRouteWithValidUser() throws Exception {
+    public void testRouteWithValidAgentUser() throws Exception {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("userAgent", "secret1");
+
+        Subject subject = new Subject();
+        subject.getPrincipals().add(token);
+
+        UserData userData = template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890,
+                Exchange.AUTHENTICATION, subject, UserData.class);
+
+        assertEquals(USERDATA_COMPLETE, userData.toString());
+    }
+    
+    @Test
+    public void testRouteWithValidEditorUser() throws Exception {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("userEditor", "secret2");
+
+        Subject subject = new Subject();
+        subject.getPrincipals().add(token);
+
+        UserData userData = template.requestBodyAndHeader("direct:findUserDataSpring", 1234567890,
+                Exchange.AUTHENTICATION, subject, UserData.class);
+
+        assertEquals(USERDATA_COMPLETE, userData.toString());
+    }
+    
+    @Test
+    public void testRouteWithValidAdminUser() throws Exception {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("userAdmin", "secret3");
 
         Subject subject = new Subject();
         subject.getPrincipals().add(token);
