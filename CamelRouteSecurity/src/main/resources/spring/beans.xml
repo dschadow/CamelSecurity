@@ -8,6 +8,17 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
 	
 	<context:component-scan base-package="com.trivadis.camel.security.rb" />
+       
+    <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <property name="allowIfAllAbstainDecisions" value="true"/>
+        <property name="decisionVoters">
+            <list>
+                <bean class="org.springframework.security.access.vote.RoleVoter"/>
+            </list>
+        </property>
+    </bean>
+    
+    <bean id="accessDeniedProcessor" class="com.trivadis.camel.security.processors.AccessDeniedProcessor" />
 
 	<bean id="userDataBean" class="com.trivadis.camel.security.user.UserDataBean">
 		<property name="dataSource" ref="dataSource" />

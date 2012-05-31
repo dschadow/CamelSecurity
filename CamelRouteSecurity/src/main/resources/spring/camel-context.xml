@@ -10,15 +10,6 @@
 
 	<import resource="classpath:spring/beans.xml" />
 	<import resource="classpath:spring/services.cxf.xml" />
-       
-    <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
-        <property name="allowIfAllAbstainDecisions" value="true"/>
-        <property name="decisionVoters">
-            <list>
-                <bean class="org.springframework.security.access.vote.RoleVoter"/>
-            </list>
-        </property>
-    </bean>
     
     <spring-security:authentication-manager alias="authenticationManager">
     	<spring-security:authentication-provider user-service-ref="userDetailsService"/>
@@ -44,8 +35,6 @@
                          authenticationManager="authenticationManager"
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
-                         
-    <bean id="accessDeniedProcessor" class="com.trivadis.camel.security.processors.AccessDeniedProcessor" />
 
 	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<contextScan />
@@ -89,14 +78,6 @@
 			<to uri="direct:calculateCategory" />
 		</route>
 		
-		<!-- see UserDataShiroRouteBuilder class 
-		<route id="findUserDataShiro"> 
-			<from uri="direct:findUserDataShiro" /> 
-			<bean ref="userDataBean" method="loadUserData" />
-			<to uri="direct:calculateShiroCategory" /> 
-		</route>
-		-->
-		
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
 
@@ -115,25 +96,14 @@
 
 			<bean ref="categoryBean" method="processData" />
 		</route>
-		
-		<!-- see CategoryShiroRouteBuilder class 
-		<route id="calculateCategoryShiro"> 
-			<from uri="direct:calculateCategorShiro" />
-			 
-			<log message="body in calculateCategoryShiro ${body}" /> 
-			<log message="header in calculateCategoryShiro ${headers}" /> 
-			
-			<bean ref="categoryBean" method="processData" />
-		</route>
-		-->
 
 		<route id="calculateCategorySpring">
 			<from uri="direct:calculateCategorySpring" />
 			
+			<log message="body in calculateCategorySpring ${body}" />
+			<log message="header in calculateCategorySpring ${headers}" />
+			
 			<policy ref="editor">
-				<log message="body in calculateCategorySpring ${body}" />
-				<log message="header in calculateCategorySpring ${headers}" />
-	
 				<bean ref="categoryBean" method="processData" />
 			</policy>
 		</route>
