@@ -45,7 +45,7 @@
                          accessDecisionManager="accessDecisionManager"
                          xmlns="http://camel.apache.org/schema/spring-security"/>
                          
-    <bean id="accessDeniedResponse" class="com.trivadis.camel.security.processors.AccessDeniedProcessor" />
+    <bean id="accessDeniedProcessor" class="com.trivadis.camel.security.processors.AccessDeniedProcessor" />
 
 	<camelContext id="findUserDataRoutes" xmlns="http://camel.apache.org/schema/spring">
 		<contextScan />
@@ -53,7 +53,7 @@
 		<onException>
 			<exception>org.springframework.security.access.AccessDeniedException</exception>
 			<handled><constant>true</constant></handled>
-			<process ref="accessDeniedResponse" />
+			<process ref="accessDeniedProcessor" />
 		</onException>
 
 		<route id="userDataEndpoint">
