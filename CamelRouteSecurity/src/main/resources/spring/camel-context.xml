@@ -3,9 +3,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camel="http://camel.apache.org/schema/spring"
 	xmlns:spring-security="http://www.springframework.org/schema/security"
 	xsi:schemaLocation="
-       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
-       http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
        http://camel.apache.org/schema/spring-security http://camel.apache.org/schema/spring-security/camel-spring-security.xsd">
 
 	<import resource="classpath:spring/beans.xml" />
@@ -78,6 +78,7 @@
 			<to uri="direct:calculateCategory" />
 		</route>
 		
+		<!-- secure method, protected by Spring Security -->
 		<route id="findUserDataSpring">
 			<from uri="direct:findUserDataSpring" />
 
@@ -88,6 +89,7 @@
 			</policy>
 		</route>
 
+		<!-- insecure method, open for all users and groups -->
 		<route id="calculateCategory">
 			<from uri="direct:calculateCategory" />
 
@@ -97,6 +99,7 @@
 			<bean ref="categoryBean" method="processData" />
 		</route>
 
+		<!-- secure method, protected by Spring Security -->
 		<route id="calculateCategorySpring">
 			<from uri="direct:calculateCategorySpring" />
 			
