@@ -9,20 +9,20 @@ import com.trivadis.camel.security.user.UserData;
 @WebService
 public interface UserDataService {
 	@WebResult(name = "userData")
-	UserData findUserData(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	UserData findUserData(@WebParam(name = "socialSecurityNumber") int socialSecurityNumber);
 	
 	@WebResult(name = "userData")
-	String findUserDataSymEncXML(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	String findUserDataSymEncXML(@WebParam(name = "socialSecurityNumber") int socialSecurityNumber);
 
 	@WebResult(name = "userData")
-	String findUserDataAsymEncXML(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	String findUserDataAsymEncXML(@WebParam(name = "socialSecurityNumber") int socialSecurityNumber);
 
 	@WebResult(name = "userData")
-	String findUserDataSymEnc(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	String findUserDataSymEnc(@WebParam(name = "socialSecurityNumber") int socialSecurityNumber);
 
 	@WebResult(name = "userData")
-	String findUserDataAsymEnc(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	String findUserDataAsymEnc(@WebParam(name = "socialSecurityNumber") int socialSecurityNumber);
 
 	@WebResult(name = "userData")
-	String findUserDataSign(@WebParam(name = "socialSecurityNumber", targetNamespace = "") int socialSecurityNumber);
+	String findUserDataSign(@WebParam(name = "socialSecurityNumber") int socialSecurityNumber);
 }

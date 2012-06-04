@@ -58,21 +58,17 @@
 				</when>
 			</choice>
 			
-			<to uri="direct:calculateCategory" />
-		</route>
-		
-		<!-- this endpoint is expected to be unsafe, data must be encrypted in request -->
-		<route id="categoryEndpoint">
-			<from uri="cxf:bean:categoryEndpoint" />
-
-			<log message="categoryEndpoint operation: ${in.header.operationName}" />
+			<setHeader headerName="operationName">
+				<constant>calculateCategory</constant>
+			</setHeader>
+ <!-- 
+			<transform>
+				<method bean="converter" method="convertToList" />
+			</transform>
+			 -->
+			<log message="calling categoryEndpoint with operation ${in.header.operationName} and message ${body} " />
 			
-			<choice>
-				<when>
-					<simple>${in.header.operationName} == 'calculateCategory'</simple>
-					<to uri="direct:calculateCategory" />
-				</when>
-			</choice>
+			<to uri="cxf:bean:categoryEndpoint" />
 		</route>
 
 		<route id="findUserDataSymEnc">
@@ -149,11 +145,13 @@
 		</route> 
 
 		<route id="calculateCategory">
-			<from uri="direct:calculateCategory" />
+			<from uri="cxf:bean:categoryEndpoint" />
 			
-			<log message="body in calculateCategory: ${body}" />
-			<log message="header in calculateCategory: ${headers}" />
-			<log message="original operation: ${in.header.originalOperation}" />
+			<log message="categoryEndpoint operation: ${in.header.operationName}" />
+			<log message="categoryEndpoint operation: ${in.header.operationNamespace}" />
+			<log message="categoryEndpoint original operation: ${in.header.originalOperation}" />
+			
+			<convertBodyTo type="java.lang.String" />
 			
 			<choice>
 				<when>

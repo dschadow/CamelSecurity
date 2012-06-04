@@ -1,7 +1,10 @@
 package com.trivadis.camel.security.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -69,5 +72,18 @@ public class Converter {
 		userData.setCategory(Integer.valueOf(dataArray[8]));
 		
 		return userData;
+	}
+	
+	public InputStream convertToStream(UserData userData) {
+		InputStream bais = new ByteArrayInputStream(userData.toString().getBytes());
+		
+		return bais;
+	}
+	
+	public List<Object> convertToList(UserData userData) {
+		List<Object> resultList = new ArrayList<Object>();
+		resultList.add(userData);
+		
+		return resultList;
 	}
 }
