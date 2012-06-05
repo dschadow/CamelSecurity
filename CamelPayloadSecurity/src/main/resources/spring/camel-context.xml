@@ -58,14 +58,13 @@
 				</when>
 			</choice>
 			
+			<setHeader headerName="operationNamespace">
+				<constant>http://services.security.camel.trivadis.com/</constant>
+			</setHeader>
 			<setHeader headerName="operationName">
 				<constant>calculateCategory</constant>
 			</setHeader>
- <!-- 
-			<transform>
-				<method bean="converter" method="convertToList" />
-			</transform>
-			 -->
+
 			<log message="calling categoryEndpoint with operation ${in.header.operationName} and message ${body} " />
 			
 			<to uri="cxf:bean:categoryEndpoint" />
@@ -150,15 +149,11 @@
 			<log message="categoryEndpoint operation: ${in.header.operationName}" />
 			<log message="categoryEndpoint operation: ${in.header.operationNamespace}" />
 			<log message="categoryEndpoint original operation: ${in.header.originalOperation}" />
-			
+			<!--  
 			<convertBodyTo type="java.lang.String" />
+			-->
 			
 			<choice>
-				<when>
-					<simple>${in.header.originalOperation} == 'findUserData'</simple>	
-					
-					<bean ref="categoryBean" method="processData" />
-				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSymEnc'</simple>			
 					<transform> 
@@ -170,9 +165,6 @@
 					<transform>
 						<method bean="converter" method="convertToUserData" />
 					</transform>
-
-					<bean ref="categoryBean" method="processData" />
-					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataAsymEnc'</simple>
@@ -185,9 +177,6 @@
 					<transform>
 						<method bean="converter" method="convertToUserData" />
 					</transform>
-					
-					<bean ref="categoryBean" method="processData" />
-					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSymEncXML'</simple>
@@ -200,9 +189,6 @@
 					<transform>
 						<method bean="converter" method="convertXmlToUserData" />
 					</transform>
-					
-					<bean ref="categoryBean" method="processData" />
-					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataAsymEncXML'</simple>
@@ -216,9 +202,6 @@
 					<transform>
 						<method bean="converter" method="convertXmlToUserData" />
 					</transform>
-					
-					<bean ref="categoryBean" method="processData" />
-					<convertBodyTo type="java.lang.String" />	
 				</when>
 				<when>
 					<simple>${in.header.originalOperation} == 'findUserDataSign'</simple>
@@ -227,11 +210,11 @@
 					<transform>
 						<method bean="converter" method="convertToUserData" />
 					</transform>
-
-					<bean ref="categoryBean" method="processData" />
-					<convertBodyTo type="java.lang.String" />	
 				</when>
-			</choice>	
+			</choice>
+			
+			<bean ref="categoryBean" method="processData" />
+			<convertBodyTo type="java.lang.String" />
 		</route>
 	</camelContext>
 

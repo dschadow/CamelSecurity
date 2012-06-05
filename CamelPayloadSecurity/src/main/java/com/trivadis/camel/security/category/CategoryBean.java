@@ -9,11 +9,11 @@ import com.trivadis.camel.security.user.UserData;
  * @version 1.0.0
  */
 public class CategoryBean {
-	public UserData processData(UserData userData) {		
+	public String processData(UserData userData) {		
 		int category = calculateCategory(userData.getSocialSecurityNumber());
 		userData.setCategory(category);
 
-		return userData;
+		return userData.toString();
 	}
 
 	private int calculateCategory(int socialSecurityNumber) {
