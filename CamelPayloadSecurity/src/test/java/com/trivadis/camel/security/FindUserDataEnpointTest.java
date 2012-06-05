@@ -13,13 +13,15 @@ import com.trivadis.camel.security.services.UserDataService;
 import com.trivadis.camel.security.user.UserData;
 
 /**
- * JUnit tests for all secured routes.
+ * JUnit tests for all secured routes.This test requires a running web server on port 8080
+ * (configured in URL) for some methods.
  * 
  * @author Dominik Schadow, Trivadis GmbH
  * @version 1.0.0
  */
 public class FindUserDataEnpointTest extends CamelSpringTestSupport {
-    private static final String SIMPLE_ENDPOINT_ADDRESS = "http://localhost:" + 8080 + "/CamelPayloadSecurity/userdata";
+    private static final String PORT = "8080";
+    private static final String SIMPLE_ENDPOINT_ADDRESS = "http://localhost:" + PORT + "/CamelPayloadSecurity/userdata";
     private static final String USERDATA_COMPLETE = "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 49";
     private static final String USERDATA_PARTIAL = "Trivadis GmbH, Dominik, Schadow, Industriestraße 4, 70565, Stuttgart, Germany, 1234567890, 0";
     private UserData userData = new UserData();
@@ -88,6 +90,13 @@ public class FindUserDataEnpointTest extends CamelSpringTestSupport {
         String response = template.requestBody("direct:findUserDataSign", userData, String.class);
         assertNotNull(response);
         assertEquals(USERDATA_PARTIAL, response);
+    }
+
+    @Test
+    public void testPublishEndpointUrl() throws Exception {
+        String response = template.requestBody(SIMPLE_ENDPOINT_ADDRESS + "?wsdl", null, String.class);
+        assertTrue("Can't find the right service location.",
+                response.contains("http://localhost:" + PORT + "/CamelPayloadSecurity/userdata"));
     }
 
     @Override
