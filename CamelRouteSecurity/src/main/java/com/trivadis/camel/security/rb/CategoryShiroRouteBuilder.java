@@ -15,34 +15,35 @@ import org.apache.shiro.authz.permission.WildcardPermission;
 import org.springframework.stereotype.Component;
 
 /**
- * Java RouteBuilder implementation for the calculateCategoryShiro route. This route requires the
- * <b>trivadis:calculateCategory:*</b> permission.
+ * Java RouteBuilder implementation for the calculateCategoryShiro route. This
+ * route requires the <b>trivadis:calculateCategory:*</b> permission.
  * 
  * @author Dominik Schadow, Trivadis GmbH
  * @version 1.0.0
  */
 @Component
 public class CategoryShiroRouteBuilder extends SpringRouteBuilder {
-    // TODO configuration via XML?
+	@Override
+	public void configure() throws Exception {
+		final byte[] passPhrase = "CamelSecureRoute".getBytes();
 
-    @Override
-    public void configure() throws Exception {
-        final byte[] passPhrase = "CamelSecureRoute".getBytes();
+		List<Permission> permissionsList = new ArrayList<Permission>();
+		Permission permission = new WildcardPermission(
+				"trivadis:calculateCategory:*");
+		permissionsList.add(permission);
 
-        List<Permission> permissionsList = new ArrayList<Permission>();
-        Permission permission = new WildcardPermission("trivadis:calculateCategory:*");
-        permissionsList.add(permission);
+		ShiroSecurityPolicy shiroSecurityPolicy = new ShiroSecurityPolicy(
+				"classpath:shirosecuritypolicy.ini", passPhrase, true,
+				permissionsList);
 
-        ShiroSecurityPolicy shiroSecurityPolicy =
-                new ShiroSecurityPolicy("classpath:shirosecuritypolicy.ini", passPhrase, true, permissionsList);
+		onException(UnknownAccountException.class,
+				IncorrectCredentialsException.class,
+				LockedAccountException.class, AuthenticationException.class)
+				.to("mock:authenticationException");
+		onException(CamelAuthorizationException.class).handled(true);
 
-        onException(UnknownAccountException.class).to("mock:authenticationException");
-        onException(IncorrectCredentialsException.class).to("mock:authenticationException");
-        onException(LockedAccountException.class).to("mock:authenticationException");
-        onException(AuthenticationException.class).to("mock:authenticationException");
-        onException(CamelAuthorizationException.class).handled(true);
-
-        from("direct:calculateCategoryShiro").routeId("calculateCategoryShiro").policy(shiroSecurityPolicy).beanRef(
-                "categoryBean", "processData");
-    }
+		from("direct:calculateCategoryShiro").routeId("calculateCategoryShiro")
+				.policy(shiroSecurityPolicy)
+				.beanRef("categoryBean", "processData");
+	}
 }

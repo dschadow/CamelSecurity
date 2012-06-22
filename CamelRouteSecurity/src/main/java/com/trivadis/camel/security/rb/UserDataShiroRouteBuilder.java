@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class UserDataShiroRouteBuilder extends SpringRouteBuilder {
-    // TODO configuration via XML?
-
     @Override
     public void configure() throws Exception {
         final byte[] passPhrase = "CamelSecureRoute".getBytes();
@@ -35,10 +33,10 @@ public class UserDataShiroRouteBuilder extends SpringRouteBuilder {
         ShiroSecurityPolicy shiroSecurityPolicy =
                 new ShiroSecurityPolicy("classpath:shirosecuritypolicy.ini", passPhrase, true, permissionsList);
 
-        onException(UnknownAccountException.class).to("mock:authenticationException");
-        onException(IncorrectCredentialsException.class).to("mock:authenticationException");
-        onException(LockedAccountException.class).to("mock:authenticationException");
-        onException(AuthenticationException.class).to("mock:authenticationException");
+        onException(UnknownAccountException.class,
+				IncorrectCredentialsException.class,
+				LockedAccountException.class, AuthenticationException.class)
+				.to("mock:authenticationException");
 
         from("direct:findUserDataShiro").routeId("findUserDataShiro").policy(shiroSecurityPolicy).beanRef(
                 "userDataBean", "loadUserData").to("direct:calculateCategoryShiro");
