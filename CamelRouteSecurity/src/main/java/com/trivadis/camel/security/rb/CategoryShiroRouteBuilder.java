@@ -40,7 +40,7 @@ public class CategoryShiroRouteBuilder extends SpringRouteBuilder {
 				IncorrectCredentialsException.class,
 				LockedAccountException.class, AuthenticationException.class)
 				.to("mock:authenticationException");
-		onException(CamelAuthorizationException.class).handled(true);
+		onException(CamelAuthorizationException.class).continued(true);
 
 		from("direct:calculateCategoryShiro").routeId("calculateCategoryShiro")
 				.policy(shiroSecurityPolicy)
